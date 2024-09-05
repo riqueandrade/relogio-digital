@@ -2,20 +2,64 @@ const horas = document.getElementById('horas');
 const minutos = document.getElementById('minutos');
 const segundos = document.getElementById('segundos');
 
-const relogio = setInterval(function time() {
-    let dateToday = new Date();
-    let hr = dateToday.getHours();
-    let min = dateToday.getMinutes();
-    let s = dateToday.getSeconds();
+const toggleThemeBtn = document.getElementById('toggleTheme');
+let is24HourFormat = true;
 
-    if (hr < 10) hr = '0' + hr;
+const dataElement = document.getElementById('data');
+let showSeconds = true;
 
-    if (min < 10) min = '0' + min;
+const ampmElement = document.getElementById('ampm');
 
-    if (s < 10) s = '0' + s;
+function toggleTheme() {
+    document.body.classList.toggle('dark-theme');
+    const themeIcon = toggleThemeBtn.querySelector('i:not(.d-none)');
+    themeIcon.classList.toggle('d-none');
+    toggleThemeBtn.querySelector('i.d-none').classList.toggle('d-none');
+}
 
+function toggle24HourFormat() {
+    is24HourFormat = !is24HourFormat;
+    atualizarRelogio();
+}
 
-    horas.textContent = hr;
-    minutos.textContent = min;
-    segundos.textContent = s;
-})
+function atualizarRelogio() {
+    const agora = new Date();
+    const formatarNumero = (num) => num.toString().padStart(2, '0');
+
+    let horasValue = agora.getHours();
+    let ampm = horasValue >= 12 ? 'PM' : 'AM';
+    
+    if (!is24HourFormat) {
+        horasValue = horasValue % 12 || 12;
+        ampmElement.textContent = ampm;
+        ampmElement.parentElement.style.display = 'flex';
+    } else {
+        ampmElement.parentElement.style.display = 'none';
+    }
+
+    horas.textContent = formatarNumero(horasValue);
+    minutos.textContent = formatarNumero(agora.getMinutes());
+    
+    if (showSeconds) {
+        segundos.textContent = formatarNumero(agora.getSeconds());
+        segundos.parentElement.style.display = 'flex';
+    } else {
+        segundos.parentElement.style.display = 'none';
+    }
+
+    // Atualizar data
+    const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dataElement.textContent = agora.toLocaleDateString('pt-BR', opcoes);
+}
+
+function toggleSeconds() {
+    showSeconds = !showSeconds;
+    atualizarRelogio();
+}
+
+toggleThemeBtn.addEventListener('click', toggleTheme);
+horas.addEventListener('click', toggle24HourFormat);
+segundos.addEventListener('click', toggleSeconds);
+
+setInterval(atualizarRelogio, 100);
+atualizarRelogio();
